@@ -1,4 +1,18 @@
 /*Stylesheet by Emily Pettit, 2018*/
-#mapid {
-  height: 180px;
+html, body, #map {
+  width: 100%;
+  height: 100%;
+  position: absolute;
+  z-index: 2;
+}
+
+body {
+  font-family: Helvetica, sans-serif;
+}
+
+h1 {
+  position: relative;
+  float: right;
+  z-index: 50;
+  color: red;
 }
