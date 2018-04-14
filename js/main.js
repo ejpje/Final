@@ -5,14 +5,13 @@ function createMap(){
     //create the map object
     var map = L.map('map').setView([48, 20], 4);
     //specify additional datasets
-
-    var swedes = new L.geoJson().addTo(map);
-    var danes = new L.geoJson().addTo(map);
+    var swedes = new L.geoJson();
     var norwegians = new L.geoJson().addTo(map);
+    var danes = new L.geoJson().addTo(map);
 
-    getSwedes(map, swedes, danes, norwegians);
-    getDanes(map, swedes, danes, norwegians);
-    getNorwegians(map, swedes, danes, norwegians);
+    getSwedes(map, swedes, norwegians, danes);
+    getNorwegians(map, swedes, norwegians, danes);
+    getDanes(map, swedes, norwegians, danes);
 
     //add OSM base tilelayer
     var osm = L.tileLayer("https://api.mapbox.com/styles/v1/mapbox/streets-v9/tiles/256/{z}/{x}/{y}?access_token=pk.eyJ1IjoiZWpwMyIsImEiOiJjamRrZ2g2d2EwMGoxMndxejdwd2poMGFhIn0.Ypo-SnygyDT2skpNIEQ60g", {
@@ -35,27 +34,53 @@ function createMap(){
     };
 
     swedes.addTo(map);
-    danes.addTo(map);
-    norwegians.addTo(map);
 
     //create layer control panel
-    L.control.layers(baseMaps, {collapsed:false}).addTo(map);
+    L.control.layers(baseMaps, overlayMaps, {collapsed:false}).addTo(map);
     return map;
 };
 
-
-//function to retrieve the data and place it on the map
-function getData(map, raids){
-  //load raid data
-  $.ajax("data/raids.geojson", {
+//function to get Swedish raid data
+function getSwedes(map, swedes, danes, norwegians){
+  //load Swedish Viking raid data
+  $.ajax("data/swedes.geojson", {
     dataType: "json",
     success: function(response){
       //create attributes array
       var attributes = processData(response);
+      //call function to create symbols
+      createCirclesSwedes(response, map, attributes);
     }
   });
 };
 
+//function to get Norwegian raid data
+function getNorwegians(map, swedes, danes, norwegians){
+  //load Norwegian Viking raid data
+  $.ajax("data/norwegians.geojson", {
+    dataType: "json",
+    success: function(response){
+      //create attributes array
+      var attributes = processData(response);
+      //call function to create symbols
+      createCirclesNorwegians(response, map, attributes);
+    }
+  });
+};
+
+//function to get Danish raid data
+function getDanes (map, swedes, danes, norwegians){
+  //load Danish Viking raid data
+  $.ajax("data/danes.geojson", {
+    dataType: "json",
+    success: function(response){
+      //create attributes array
+      var attributes = processData(response);
+      //call function to create symbols
+      createCirclesDanes(response, map, attributes);
+    }
+  });
+};
 
 
 //function to attach popup to each feature
@@ -75,10 +100,10 @@ function onEachFeature(feature, layer){
 //function to convert markers to circles
 function pointToLayer(feature, latlng, attributes){
   //determine which attribute to visualize
-  var attribute = attributes[0];
+  var attribute = attributes[3];
 
   //create marker options
-  if (attribute.includes("Swedes")){
+  if (attribute == "Swedes"){
     var options = {
       fillColor: "#fff600",
       color: "#000",
@@ -87,7 +112,7 @@ function pointToLayer(feature, latlng, attributes){
       fillOpacity: 0.8
     };
   } else
-    if (attribute.includes("Norwegians")){
+    if (attribute == "Norwegians"){
       var options = {
         fillColor: "#0300c1",
         color: "#000",
@@ -95,8 +120,8 @@ function pointToLayer(feature, latlng, attributes){
         opacity: 1,
         fillOpacity: 0.8,
       };
-  } else {
-    if (attribute.includes("Danish")){
+  } else
+    if (attribute == "Danes"){
       var options = {
         fillColor: "#e50b0b",
         color: "#000",
@@ -105,7 +130,11 @@ function pointToLayer(feature, latlng, attributes){
         fillOpacity: 0.8,
       };
     }
-  }
+
+  //determine each feature's value for the selected attribute
+  var attValue = Number(feature.properties[attribute]);
+
+  var layer = L.circleMarker(latlng, options);
   //return the circle marker to the L.geoJson pointToLayer option
   return layer;
 };
@@ -119,9 +148,9 @@ function processData(data){
   var properties = data.features[0].properties;
   //push each attribute name into attributes array
   for (var attribute in properties){
-    //only take attributes with raid location
-    if (attribute.indexOf("Date") > -1){
-      attributes.push(attribute);
+    //take attributes with raid century
+    if (attribute.indexOf("Source") > -1){
+      attributes.push(attributes);
     };
   };
 
@@ -132,50 +161,38 @@ function processData(data){
 };
 
 
-function getSwedes(map, swedes, danes, norwegians){
-    //load Swedish Viking raid data
-    $.ajax("data/swedes.geojson", {
-      dataType: "json",
-      success: function(response){
-        //create attributes array
-        var attributes = processData(response);
-      }
-    });
-  };
-
-
-function getNorwegians(map, swedes, danes, norwegians){
-  //load Norwegian Viking raid data
-  $.ajax("data/norwegians.geojson", {
-    dataType: "json",
-    success: function(response){
-      //create attributes array
-      var attributes = processData(response);
-    }
-  });
-};
-
-function getDanes (map, swedes, danes, norwegians){
-  //load Danish Viking raid data
-  $.ajax("data/danes.geojson", {
-    dataType: "json",
-    success: function(response){
-      //create attributes array
-      var attributes = processData(response);
-    }
-  });
-};
-
-
-//function to add circle markers for point features to the map
-function createCircleSwedes(data, swedes, attributes){
+//function to add circle markers for Swedish raid point features to the map
+function createCirclesSwedes(data, swedes, attributes){
   //create Leaflet GeoJSON layer and add it to the map
-  swedesCircle = L.geoJson(data,{
-    //convert symbol to circle
+  swedeSize = L.geoJson(data,{
     pointToLayer: function(feature, latlng){
       return pointToLayer(feature, latlng, attributes);
     }
-  }).addTo(map);
-};*/
+  }).addTo(swedes);
+};
+
+
+//function to add circle markers for Norwegian raid point features to the map
+function createCirclesNorwegians(data, norwegians, attributes){
+  //create Leaflet GeoJSON layer and add it to the map
+  norwegianSize = L.geoJson(data,{
+    pointToLayer: function(feature, latlng){
+      return pointToLayer(feature, latlng, attributes);
+    }
+  }).addTo(norwegians);
+};
+
+
+//function to add circle markers for Danish raid point features to the map
+function createCirclesDanes(data, danes, attributes){
+  //create Leaflet GeoJSON layer and add it to the map
+  daneSize = L.geoJson(data,{
+    pointToLayer: function(feature, latlng){
+      return pointToLayer(feature, latlng, attributes);
+    }
+  }).addTo(danes);
+};
+
+
 
 $(document).ready(createMap);
