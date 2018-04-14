@@ -1,4 +1,4 @@
-
+//Script by Emily Pettit, 2018//
 //function to load the map
 function createMap(){
   //create map
