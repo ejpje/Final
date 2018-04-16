@@ -2,97 +2,56 @@
 
 //function to instantiate the Leaflet map
 function createMap(){
-    //create the map object
-    var map = L.map('map').setView([48, 20], 4);
-    //specify additional datasets
-    var swedes = new L.geoJson();
-    var norwegians = new L.geoJson().addTo(map);
-    var danes = new L.geoJson().addTo(map);
+  //create the map object
+  var map = L.map('map').setView([48, 20], 4);
+  //specify additional datasets to add to the layer group
+  var swedes = new L.geoJson().addTo(map);
+  var norwegians = new L.geoJson().addTo(map);
+  var danes = new L.geoJson().addTo(map);
 
-    getSwedes(map, swedes, norwegians, danes);
-    getNorwegians(map, swedes, norwegians, danes);
-    getDanes(map, swedes, norwegians, danes);
+  //add the raid data to the map
+  getSwedes(map, swedes, norwegians, danes);
+  getNorwegians(map, swedes, norwegians, danes);
+  getDanes(map, swedes, norwegians, danes);
 
-    //add OSM base tilelayer
-    var osm = L.tileLayer("https://api.mapbox.com/styles/v1/mapbox/streets-v9/tiles/256/{z}/{x}/{y}?access_token=pk.eyJ1IjoiZWpwMyIsImEiOiJjamRrZ2g2d2EwMGoxMndxejdwd2poMGFhIn0.Ypo-SnygyDT2skpNIEQ60g", {
-        attribution: "&copy; <a href='http://www.openstreetmap.org/copyright'> Mapbox Streets"
-    }),
-    //specify other basemap layers
-        light = L.tileLayer("https://api.mapbox.com/styles/v1/mapbox/light-v9/tiles/256/{z}/{x}/{y}?access_token=pk.eyJ1IjoiZWpwMyIsImEiOiJjamRrZ2g2d2EwMGoxMndxejdwd2poMGFhIn0.Ypo-SnygyDT2skpNIEQ60g", {
-        attribution: "&copy; <a href='http://www.openstreetmap.org/copyright'> Mapbox Light"
-    }).addTo(map);
+  //add OSM base tilelayer to the map
+  var osm = L.tileLayer("https://api.mapbox.com/styles/v1/mapbox/streets-v9/tiles/256/{z}/{x}/{y}?access_token=pk.eyJ1IjoiZWpwMyIsImEiOiJjamRrZ2g2d2EwMGoxMndxejdwd2poMGFhIn0.Ypo-SnygyDT2skpNIEQ60g", {
+      attribution: "&copy; <a href='http://www.openstreetmap.org/copyright'> Mapbox Streets"
+  }),
+  //specify other basemap layers to add
+      light = L.tileLayer("https://api.mapbox.com/styles/v1/mapbox/light-v9/tiles/256/{z}/{x}/{y}?access_token=pk.eyJ1IjoiZWpwMyIsImEiOiJjamRrZ2g2d2EwMGoxMndxejdwd2poMGFhIn0.Ypo-SnygyDT2skpNIEQ60g", {
+      attribution: "&copy; <a href='http://www.openstreetmap.org/copyright'> Mapbox Light"
+  }).addTo(map);
 
-    var baseMaps = {
-      "Light": light,
-      "Streets": osm,
-    };
+  //basemaps to add
+  var baseMaps = {
+    "Greyscale": light,
+    "Streets": osm,
+  };
 
-    var overlayMaps = {
-      "Swedish": swedes,
-      "Danish": danes,
-      "Norwegian": norwegians,
-    };
+  //overlay maps to add
+  var overlayMaps = {
+    "Swedish": swedes,
+    "Norwegian": norwegians,
+    "Danish": danes,
+  };
 
-    swedes.addTo(map);
-
-    //create layer control panel
-    L.control.layers(baseMaps, overlayMaps, {collapsed:false}).addTo(map);
-    return map;
-};
-
-//function to get Swedish raid data
-function getSwedes(map, swedes, danes, norwegians){
-  //load Swedish Viking raid data
-  $.ajax("data/swedes.geojson", {
-    dataType: "json",
-    success: function(response){
-      //create attributes array
-      var attributes = processData(response);
-      //call function to create symbols
-      createCirclesSwedes(response, map, attributes);
-    }
-  });
-};
-
-//function to get Norwegian raid data
-function getNorwegians(map, swedes, danes, norwegians){
-  //load Norwegian Viking raid data
-  $.ajax("data/norwegians.geojson", {
-    dataType: "json",
-    success: function(response){
-      //create attributes array
-      var attributes = processData(response);
-      //call function to create symbols
-      createCirclesNorwegians(response, map, attributes);
-    }
-  });
-};
-
-//function to get Danish raid data
-function getDanes (map, swedes, danes, norwegians){
-  //load Danish Viking raid data
-  $.ajax("data/danes.geojson", {
-    dataType: "json",
-    success: function(response){
-      //create attributes array
-      var attributes = processData(response);
-      //call function to create symbols
-      createCirclesDanes(response, map, attributes);
-    }
-  });
+  //create layer control panel
+  L.control.layers(baseMaps, overlayMaps, {collapsed:false}).addTo(map);
+  return map;
 };
 
 
-//function to attach popup to each feature
+// attach popup to each feature
 function onEachFeature(feature, layer){
-  //create html string with all properties
+  //create an html string with all properties
   var popupContent = "";
   if (feature.properties) {
-    //loop to add feature property names and values to html string
-    for (var property in feature.properties){
-      popupContent += "<p>" + property + ": " + feature.properties[property] + "</p>";
-    }
-    layer.bindPopup(popupContent);
+      //loop to add feature property names and values to html string
+      for (var property in feature.properties){
+          popupContent += "<p>" + property + ": " + feature.properties[property] + "</p>";
+      }
+      layer.bindPopup(popupContent);
   }
 };
 
@@ -100,64 +59,45 @@ function onEachFeature(feature, layer){
 //function to convert markers to circles
 function pointToLayer(feature, latlng, attributes){
   //determine which attribute to visualize
-  var attribute = attributes[3];
+  var attribute = attributes[0];
 
   //create marker options
-  if (attribute == "Swedes"){
+  if (attributes.includes("Raid_Location_Swedes")){
     var options = {
+      radius: 6,
       fillColor: "#fff600",
       color: "#000",
       weight: 1,
       opacity: 1,
       fillOpacity: 0.8
     };
-  } else
-    if (attribute == "Norwegians"){
-      var options = {
-        fillColor: "#0300c1",
-        color: "#000",
-        weight: 1,
-        opacity: 1,
-        fillOpacity: 0.8,
-      };
-  } else
-    if (attribute == "Danes"){
-      var options = {
-        fillColor: "#e50b0b",
-        color: "#000",
-        weight: 1,
-        opacity: 1,
-        fillOpacity: 0.8,
-      };
-    }
-
-  //determine each feature's value for the selected attribute
-  var attValue = Number(feature.properties[attribute]);
-
-  var layer = L.circleMarker(latlng, options);
-  //return the circle marker to the L.geoJson pointToLayer option
-  return layer;
-};
-
-
-//function to build an attribute array from the data
-function processData(data){
-  //empty array to hold attributes
-  var attributes = [];
-  //properties of the first feature in the dataset
-  var properties = data.features[0].properties;
-  //push each attribute name into attributes array
-  for (var attribute in properties){
-    //take attributes with raid century
-    if (attribute.indexOf("Source") > -1){
-      attributes.push(attributes);
+  } else if (attributes.includes("Raid_Location_Norwegians")){
+    var options = {
+      radius: 6,
+      fillColor: "#0d00cc",
+      color: "#000",
+      weight: 1,
+      opacity: 1,
+      fillOpacity: 0.8
+    };
+  } else if (attributes.includes("Raid_Location_Danes")){
+    var options = {
+      radius: 6,
+      fillColor: "#e20000",
+      color: "#000",
+      weight: 1,
+      opacity: 1,
+      fillOpacity: 0.8
     };
   };
 
-  //check results
-  console.log(attributes);
+  //determine each feature value based on a selected attribute
+  var attValue = Number(feature.properties[attribute]);
+  //create circle marker layer
+  var layer = L.circleMarker(latlng, options);
 
-  return attributes;
+  //return the circle marker to the L.geoJson pointToLayer option
+  return layer;
 };
 
 
@@ -171,7 +111,6 @@ function createCirclesSwedes(data, swedes, attributes){
   }).addTo(swedes);
 };
 
-
 //function to add circle markers for Norwegian raid point features to the map
 function createCirclesNorwegians(data, norwegians, attributes){
   //create Leaflet GeoJSON layer and add it to the map
@@ -181,7 +120,6 @@ function createCirclesNorwegians(data, norwegians, attributes){
     }
   }).addTo(norwegians);
 };
-
 
 //function to add circle markers for Danish raid point features to the map
 function createCirclesDanes(data, danes, attributes){
@@ -193,6 +131,114 @@ function createCirclesDanes(data, danes, attributes){
   }).addTo(danes);
 };
 
+
+
+//function to create sequence controls
+function createSequenceControls(map, swedes, norwegians, danes, attributes){
+  var SequenceControl = L.Control.extend({
+    options: {
+      position: "bottomleft"
+    },
+
+    onAdd: function(map){
+      //create the container div for the slider
+      var slider = L.DomUtil.create("div", "range-slider-container");
+      $(slider).append("<input class='range-slider' type='range' max=8 min=0 step=1 value=0>");
+
+      //add skip buttons here
+      $(slider).on("mousedown dblclick", function(e){
+        L.DomEvent.stopPropagation(e);
+      });
+
+      $(slider).on("mousedown", function(){
+        map.dragging.disable();
+      });
+      return slider;
+    }
+  });
+
+  map.addControl(new SequenceControl());
+  //add in code for slider buttons/click listeners/etc.
+};
+
+//create temporal legend?
+//create general legend
+//add function to update legend(s)
+
+
+
+//function to build an attribute array from the data
+function processData(data){
+  //empty array to hold attributes
+  var attributes = [];
+  //properties of the first feature in the dataset
+  var properties = data.features[1].properties;
+
+  console.log(properties);
+
+  //push each attribute name into attributes array
+  for (var attribute in properties){
+    //take attributes
+    if (attribute.indexOf("Raid_Location") > -1){
+      attributes.push(attribute);
+    };
+  };
+
+  //check results
+  console.log(attributes);
+
+  return attributes;
+};
+
+
+//function to get Swedish raid data
+function getSwedes(map, swedes, norwegians, danes){
+  //load Swedish Viking raid data
+  $.ajax("data/swedes.geojson", {
+    dataType: "json",
+    success: function(response){
+      //create attributes array
+      var attributes = processData(response);
+      //call function to create symbols
+      createCirclesSwedes(response, swedes, attributes);
+      //createSequenceControls(map, norwe/swe/dan, attributes);
+    }
+  });
+};
+
+//function to get Norwegian raid data
+function getNorwegians(map, swedes, norwegians, danes){
+  //load Norwegian Viking raid data
+  $.ajax("data/norwegians.geojson", {
+    dataType: "json",
+    success: function(response){
+      //create attributes array
+      var attributes = processData(response);
+      //call function to create symbols
+      createCirclesNorwegians(response, norwegians, attributes);
+      //createSequenceControls(map, norwe/swe/dan, attributes);
+    }
+  });
+};
+
+//function to get Danish raid data
+function getDanes (map, swedes, norwegians, danes){
+  //load Danish Viking raid data
+  $.ajax("data/danes.geojson", {
+    dataType: "json",
+    success: function(response){
+      //create attributes array
+      var attributes = processData(response);
+      //call function to create symbols
+      createCirclesDanes(response, danes, attributes);
+      //createSequenceControls(map, norwe/swe/dan, attributes);
+    }
+  });
+};
+
+
+//update symbols?
+//create popup content
 
 
 $(document).ready(createMap);

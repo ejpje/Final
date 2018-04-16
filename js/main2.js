@@ -1,4 +1,5 @@
 //Script by Emily Pettit, 2018//
+
 //function to load the map
 function createMap(){
   //create map
@@ -7,18 +8,17 @@ function createMap(){
     zoom: 4
   });
 
-  L.tileLayer("https://api.mapbox.com/styles/v1/mapbox/light-v9/tiles/256/{z}/{x}/{y}?access_token=pk.eyJ1IjoiZWpwMyIsImEiOiJjamRrZ2g2d2EwMGoxMndxejdwd2poMGFhIn0.Ypo-SnygyDT2skpNIEQ60g", {
-    attribution: "&copy; <a href='http://www.openstreetmap.org/copyright'> Mapbox Light"
-  }).addTo(map);
+  var light = L.tileLayer("https://api.mapbox.com/styles/v1/mapbox/light-v9/tiles/256/{z}/{x}/{y}?access_token=pk.eyJ1IjoiZWpwMyIsImEiOiJjamRrZ2g2d2EwMGoxMndxejdwd2poMGFhIn0.Ypo-SnygyDT2skpNIEQ60g", {
+        attribution: "&copy; <a href='http://www.openstreetmap.org/copyright'> Mapbox Light"
+    }).addTo(map);
 
   getData(map);
 };
 
-
 //function to get data
 function getData(map){
   //load data
-  $.ajax("data/swedes.geojson", {
+  var swedes = $.ajax("data/swedes.geojson", {
     dataType: "json",
     success: function(response){
 
@@ -42,7 +42,7 @@ function getData(map){
   });
 
   //load data
-  $.ajax("data/norwegians.geojson", {
+  var norwegians = $.ajax("data/norwegians.geojson", {
     dataType: "json",
     success: function(response){
 
@@ -65,7 +65,7 @@ function getData(map){
     }
   });
   //load data
-  $.ajax("data/danes.geojson", {
+  var danes = $.ajax("data/danes.geojson", {
     dataType: "json",
     success: function(response){
 
