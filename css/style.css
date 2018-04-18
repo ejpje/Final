@@ -16,3 +16,37 @@ h1 {
   z-index: 50;
   color: red;
 }
+
+.range-slider {
+  width: 200px;
+  display: inline-block;
+}
+
+.range-slider-container {
+  bottom: 40px;
+  width: 350px;
+  height: 30px;
+  background-color: #000;
+  padding: 10px;
+  line-height: 45px;
+  text-align: center;
+  border: solid gray 1px;
+  box-shadow 0 1px 5px;
+}
+
+#forward {
+  float: right;
+}
+
+#reverse {
+  float: left;
+}
+
+.leaflet-popup-content p {
+  margin: 5px 0;
+}
+
+.popupContent {
+  font-family: Helvetica, sans-serif;
+  font-size: 10px;
+}

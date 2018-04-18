@@ -110,7 +110,6 @@ function createCirclesSwedes(data, swedes, attributes){
     }
   }).addTo(swedes);
 };
-
 //function to add circle markers for Norwegian raid point features to the map
 function createCirclesNorwegians(data, norwegians, attributes){
   //create Leaflet GeoJSON layer and add it to the map
@@ -120,7 +119,6 @@ function createCirclesNorwegians(data, norwegians, attributes){
     }
   }).addTo(norwegians);
 };
-
 //function to add circle markers for Danish raid point features to the map
 function createCirclesDanes(data, danes, attributes){
   //create Leaflet GeoJSON layer and add it to the map
@@ -238,7 +236,24 @@ function getDanes (map, swedes, norwegians, danes){
 
 
 //update symbols?
+
 //create popup content
+function Popup(properties, attribute, layer, radius){
+  this.properties = properties;
+  this.attribute = attribute;
+  this.layer = layer;
+  this.year = attribute.split("_")[1];
+  this.raids = this.properties[attribute];
+  this.content = "<p><b>City:</b> " + this.properties.Country + "</p><p><b>Number of raids in " + this.Raid_Location_Danes + ":</b> " + this.Date + "</p>";
+
+  this.bindToLayer = function(){
+    this.layer.bindPopup(this.content, {
+      offset: new L.Point(0,-1)
+    });
+  };
+};
+
+
 
 
 $(document).ready(createMap);
