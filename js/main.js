@@ -62,7 +62,7 @@ function pointToLayer(feature, latlng, attributes){
   var attribute = attributes[0];
 
   //create marker options
-  if (attributes.includes("Raid_Location_Swedes")){
+  if (attributes.includes("Raid_LocationSwedes")){
     var options = {
       radius: 6,
       fillColor: "#fff600",
@@ -71,7 +71,12 @@ function pointToLayer(feature, latlng, attributes){
       opacity: 1,
       fillOpacity: 0.8
     };
-  } else if (attributes.includes("Raid_Location_Norwegians")){
+    var layer = L.circleMarker(latlng, options);
+    var popupContent = "<p><b>City:</b> " + feature.properties.Raid_LocationSwedes + "</p>" + "<p><b>Date:</b> " + feature.properties.Date + "</p>";
+    layer.bindPopup(popupContent, {
+      offset: new L.Point(0, -options.radius)
+    });
+  } else if (attributes.includes("Raid_LocationNorwegians")){
     var options = {
       radius: 6,
       fillColor: "#0d00cc",
@@ -80,7 +85,12 @@ function pointToLayer(feature, latlng, attributes){
       opacity: 1,
       fillOpacity: 0.8
     };
-  } else if (attributes.includes("Raid_Location_Danes")){
+    layer = L.circleMarker(latlng, options);
+    popupContent = "<p><b>City:</b> " + feature.properties.Raid_LocationNorwegians + "</p>" + "<p><b>Date:</b> " + feature.properties.Date + "</p>";
+    layer.bindPopup(popupContent, {
+      offset: new L.Point(0, -options.radius)
+    });
+  } else if (attributes.includes("Raid_LocationDanes")){
     var options = {
       radius: 6,
       fillColor: "#e20000",
@@ -89,12 +99,25 @@ function pointToLayer(feature, latlng, attributes){
       opacity: 1,
       fillOpacity: 0.8
     };
-  };
+    layer = L.circleMarker(latlng, options);
+    popupContent = "<p><b>City:</b> " + feature.properties.Raid_LocationDanes + "</p>" + "<p><b>Date:</b> " + feature.properties.Date + "</p>";
 
+    layer.bindPopup(popupContent, {
+      offset: new L.Point(0, -options.radius)
+    });
+  }
   //determine each feature value based on a selected attribute
   var attValue = Number(feature.properties[attribute]);
-  //create circle marker layer
-  var layer = L.circleMarker(latlng, options);
+
+  //event listeners to open popup on mouse movement
+  layer.on({
+    mouseover: function(){
+      this.openPopup();
+    },
+    mouseout: function(){
+      this.closePopup();
+    },
+  });
 
   //return the circle marker to the L.geoJson pointToLayer option
   return layer;
@@ -203,7 +226,6 @@ function getSwedes(map, swedes, norwegians, danes){
     }
   });
 };
-
 //function to get Norwegian raid data
 function getNorwegians(map, swedes, norwegians, danes){
   //load Norwegian Viking raid data
@@ -218,7 +240,6 @@ function getNorwegians(map, swedes, norwegians, danes){
     }
   });
 };
-
 //function to get Danish raid data
 function getDanes (map, swedes, norwegians, danes){
   //load Danish Viking raid data
@@ -236,22 +257,6 @@ function getDanes (map, swedes, norwegians, danes){
 
 
 //update symbols?
-
-//create popup content
-function Popup(properties, attribute, layer, radius){
-  this.properties = properties;
-  this.attribute = attribute;
-  this.layer = layer;
-  this.year = attribute.split("_")[1];
-  this.raids = this.properties[attribute];
-  this.content = "<p><b>City:</b> " + this.properties.Country + "</p><p><b>Number of raids in " + this.Raid_Location_Danes + ":</b> " + this.Date + "</p>";
-
-  this.bindToLayer = function(){
-    this.layer.bindPopup(this.content, {
-      offset: new L.Point(0,-1)
-    });
-  };
-};
 
 
 
