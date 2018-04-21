@@ -47,20 +47,6 @@ function createMap(){
 };
 
 
-//attach popup to each feature
-function onEachFeature(feature, layer){
-  //create an html string with all properties
-  var popupContent = "";
-  if (feature.properties) {
-      //loop to add feature property names and values to html string
-      for (var property in feature.properties){
-          popupContent += "<p>" + property + ": " + feature.properties[property] + "</p>";
-      }
-      layer.bindPopup(popupContent);
-  }
-};
-
-
 //function to convert markers to circles
 function pointToLayer(feature, latlng, attributes){
   //determine which attribute to visualize
