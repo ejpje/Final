@@ -50,7 +50,7 @@ function createMap(){
 //function to convert markers to circles
 function pointToLayer(feature, latlng, attributes){
   //determine which attribute to visualize
-  var attribute = attributes[0];
+  var attribute = attributes[9];
 
   //create marker options
   if (attributes.includes("Raid_LocationSwedes")){
@@ -157,7 +157,7 @@ function createSequenceControls(map, swedes, norwegians, danes, attributes){
     onAdd: function(map){
       //create the container div for the slider
       var slider = L.DomUtil.create("div", "range-slider-container");
-      $(slider).append("<input class='range-slider' type='range' max=5 min=0 step=1 value=0>");
+      $(slider).append("<input class='range-slider' type='range' max=12 min=9 step=1 value=0>");
 
       //add skip buttons here
       $(slider).append("<button class='skip' id='forward' title='Forward'>Forward</button>");
@@ -190,11 +190,11 @@ function createSequenceControls(map, swedes, norwegians, danes, attributes){
     if ($(this).attr("id") == "forward"){
       index ++;
       //if past the last attribute then wrap around to the first
-      index = index > 5 ? 0 : index;
+      index = index > 12 ? 9 : index;
     } else if ($(this).attr("id") == "reverse"){
       index --;
       //if past the first attribute then wrap around to the last
-      index = index < 0 ? 5 : index;
+      index = index < 9 ? 12 : index;
     };
     //update slider
     $(".range-slider").val(index);
@@ -203,7 +203,7 @@ function createSequenceControls(map, swedes, norwegians, danes, attributes){
   $(".range-slider").on("input", function(){
     //get the new index value
     var index = $(this).val();
-    updateSymbolsSwedes(map, attributes[2]);
+    //updateSymbolsSwedes(map, attributes[]);
   });
 };
 
@@ -252,13 +252,12 @@ function createLegend(map, attributes){
 //add function to update legend(s)
 
 
-
 //function to build an attribute array from the data
 function processData(data){
   //empty array to hold attributes
   var attributes = [];
   //properties of the first feature in the dataset
-  var properties = data.features[1].properties;
+  var properties = data.features[0].properties;
 
   console.log(properties);
 
@@ -266,7 +265,7 @@ function processData(data){
   for (var attribute in properties){
     //take attributes
     if (attribute.indexOf("Raid_Location") > -1){
-      attributes.push(attribute);
+      attributes.push(attribute)
     };
   };
 
@@ -326,7 +325,7 @@ function getDanes (map, swedes, norwegians, danes){
 
 //function to update symbols
 function updateSymbolsSwedes(swedes, map, attribute){
-  swedes.eachLayer(function(layer){
+  map.eachLayer(function(layer){
     if (layer.feature && layer.feature.properties[attribute]){
       var props = layer.feature.properties;
 
@@ -337,7 +336,7 @@ function updateSymbolsSwedes(swedes, map, attribute){
   });
 };
 
-//marker cluster?
+//spider?
 
 //flow lines?
 
