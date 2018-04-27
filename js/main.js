@@ -1,23 +1,18 @@
 /*Script by Emily Pettit, 2018*/
-
+/*
+//splash screen
 $(document).click(function(){
-  console.log('hello');
   $("#welcomeWrapper").hide();
-});
+});*/
 
 //function to create the Leaflet map
 function createMap(){
   //create the map object
-  var map = L.map('map').setView([48, 20], 4);
+  var map = L.map('map').setView([48, 20], 3);
   //specify additional datasets to add to the layer group
   var swedes = new L.geoJson().addTo(map);
   var norwegians = new L.geoJson().addTo(map);
   var danes = new L.geoJson().addTo(map);
-
-  //map data attribution
-  swedes.getAttribution = function(){return};
-  norwegians.getAttribution = function(){return};
-  danes.getAttribution = function(){return};
 
   //add the raid data to the map
   getSwedes(map, swedes, norwegians, danes);
@@ -46,37 +41,32 @@ function createMap(){
     "Danish": danes,
   };
 
-  //swedes.addTo(map);
-
   //create layer control panel
   L.control.layers(baseMaps, overlayMaps, {collapsed:false}).addTo(map);
   return map;
 };
 
 
+//function to attach popup to each feature
+function onEachFeature(feature, layer){
+  var popupContent = "";
+  if (feature.properties){
+    //loop to add feature property names and values
+    for (var property in feature.properties){
+      popupContent += "<p><b>Place:</b> " + property + ": " + feature.properties[property] + "</p>";
+    }
+    layer.bindPopup(popupContent);
+  }
+};
+
+
 //function to convert markers to circles
 function pointToLayer(feature, latlng, attributes){
-  var first = feature.properties.Raid_700s;
-  console.log(first);
-  var second = feature.properties.Raid_800s;
-  var third = feature.properties.Raid_900s;
-  var fourth = feature.properties.Raid_1000s;
-
-  if (first < 1){
-    $(".first").hide();
-  } else
-  if (second < 1){
-    $(second).hide();
-  } else
-  if (third < 1){
-    $(third).hide();
-  } else
-  if (fourth < 1){
-    $(fourth).hide();
-  };
+  var attribute = attributes[3];
+console.log(attribute);
 
   //create marker options
-  if (attributes.includes("Raid_Swedes")){
+  if (attribute.includes("SwedesRaid")){
     var options = {
       radius: 6,
       fillColor: "#fff600",
@@ -85,12 +75,7 @@ function pointToLayer(feature, latlng, attributes){
       opacity: 1,
       fillOpacity: 0.8
     };
-    var layer = L.circleMarker(latlng, options);
-    var popupContent = "<p><b>Place:</b> " + feature.properties.Raid_Swedes + ", " + feature.properties.Raid_Country + "</p>" + "<p><b>Date:</b> " + feature.properties.Raid_Date + "</p>";
-    layer.bindPopup(popupContent, {
-      offset: new L.Point(0, -options.radius)
-    });
-  } else if (attributes.includes("Raid_Norwegians")){
+  } else if (attribute.includes("NorwegiansRaid")){
     var options = {
       radius: 6,
       fillColor: "#0d00cc",
@@ -99,13 +84,7 @@ function pointToLayer(feature, latlng, attributes){
       opacity: 1,
       fillOpacity: 0.8
     };
-    layer = L.circleMarker(latlng, options);
-    popupContent = "<p><b>Place:</b> " + feature.properties.Raid_Norwegians + ", " + feature.properties.Raid_Country + "</p>" + "<p><b>Date:</b> " + feature.properties.Raid_Date + "</p>";
-    layer.bindPopup(popupContent, {
-      offset: new L.Point(0, -options.radius)
-    });
-
-  } else if (attributes.includes("Raid_Danes")){
+  } else if (attribute.includes("DanesRaid")){
     var options = {
       radius: 6,
       fillColor: "#e20000",
@@ -114,28 +93,50 @@ function pointToLayer(feature, latlng, attributes){
       opacity: 1,
       fillOpacity: 0.8
     };
-    layer = L.circleMarker(latlng, options);
-    popupContent = "<p><b>Place:</b> " + feature.properties.Raid_Danes + ", " + feature.properties.Raid_Country + "</p>" + "<p><b>Date:</b> " + feature.properties.Raid_Date + "</p>";
-    layer.bindPopup(popupContent, {
-      offset: new L.Point(0, -options.radius)
-    });
   }
+
+  //for each feature, determine its value for the selected attribute
+  var attValue = Number(feature.properties[attribute]);
+console.log(attValue);
+  //create circle marker layer
+  var layer = L.circleMarker(latlng, options);
+
+  //call the create popup function
+  createPopUp(feature.properties, attribute, layer, options);
+
   //event listeners to open popup on mouse movement
   layer.on({
     mouseover: function(){
       this.openPopup();
+      this.setStyle({color: "white", weight: 3});
     },
     mouseout: function(){
       this.closePopup();
-    },
+      this.setStyle({color: "black", weight: 1});
+    }
   });
   //return the circle marker to the L.geoJson pointToLayer option
   return layer;
 };
 
 
+//function to calculate the radius of each proportional symbol
+function calcPropRadius(attValue){
+  console.log(attValue);
+
+  //scale factor to adjust symbol size evenly
+  var scaleFactor = 50;
+  //area based on attribute value and scale factor
+  var area = attValue * scaleFactor;
+  //radius calculated based on area
+  var radius = (Math.sqrt(area/Math.PI))*(5);
+
+  return radius;
+};
+
+
 //function to add circle markers for Swedish raid point features to the map
-function createCirclesSwedes(data, swedes, attributes){
+function createPropSymbolsSwedes(data, swedes, attributes){
   //create Leaflet GeoJSON layer and add it to the map
   swedeSize = L.geoJson(data,{
     pointToLayer: function(feature, latlng){
@@ -143,9 +144,8 @@ function createCirclesSwedes(data, swedes, attributes){
     }
   }).addTo(swedes);
 };
-
 //function to add circle markers for Norwegian raid point features to the map
-function createCirclesNorwegians(data, norwegians, attributes){
+function createPropSymbolsNorwegians(data, norwegians, attributes){
   //create Leaflet GeoJSON layer and add it to the map
   norwegianSize = L.geoJson(data,{
     pointToLayer: function(feature, latlng){
@@ -153,9 +153,8 @@ function createCirclesNorwegians(data, norwegians, attributes){
     }
   }).addTo(norwegians);
 };
-
 //function to add circle markers for Danish raid point features to the map
-function createCirclesDanes(data, danes, attributes){
+function createPropSymbolsDanes(data, danes, attributes){
   //create Leaflet GeoJSON layer and add it to the map
   daneSize = L.geoJson(data,{
     pointToLayer: function(feature, latlng){
@@ -169,7 +168,7 @@ function createCirclesDanes(data, danes, attributes){
 function createSequenceControls(map, swedes, norwegians, danes, attributes){
   var SequenceControl = L.Control.extend({
     options: {
-      position: "bottomleft"
+      position: "bottomleft",
     },
     onAdd: function(map){
       //create the container div for the slider
@@ -192,6 +191,7 @@ function createSequenceControls(map, swedes, norwegians, danes, attributes){
   });
 
   createTemporalLegend(map, attributes);
+  createLegendSwedes(map, attributes);
 
   map.addControl(new SequenceControl());
 
@@ -217,14 +217,187 @@ function createSequenceControls(map, swedes, norwegians, danes, attributes){
     //update slider
     $(".range-slider").val(index);
     //update symbols here
-    updateSymbolsSwedes(swedeSize, map, attributes[index]);
-
+    updatePropSymbolsSwedes(swedeSize, map, attributes[index]);
+    updatePropSymbolsNorwegians(norwegianSize, map, attributes[index]);
+    updatePropSymbolsDanes(daneSize, map, attributes[index]);
   });
   $(".range-slider").on("input", function(){
     //get the new index value
     var index = $(this).val();
-    updateSymbolsSwedes(swedeSize, map, attributes[index]);
+    updatePropSymbolsSwedes(swedeSize, map, attributes[index]);
+    updatePropSymbolsNorwegians(norwegianSize, map, attributes[index]);
+    updatePropSymbolsDanes(daneSize, map, attributes[index]);
   });
+};
+
+
+//function to create temporal legend
+function createTemporalLegend(map, attributes){
+  var LegendControl = L.Control.extend({
+    options:{
+      position: "topleft"
+    },
+
+    onAdd: function(map){
+      //create the temporal legend container
+      var timestamp = L.DomUtil.create("div", "timestamp-container");
+      $(timestamp).append("<div id='timestamp-container'>");
+      return timestamp;
+    }
+  });
+  map.addControl(new LegendControl());
+  updateLegend(map, attributes);
+};
+
+
+//function to create the attribute legend
+function createLegendSwedes(map, attributes){
+  var LegendControl = L.Control.extend({
+    options: {
+      position: "bottomright"
+    },
+    onAdd: function(map){
+      var container = L.DomUtil.create("div", "legend-control-container");
+      var svg = "<svg id='attribute-legend' width='200px' height='100px'>";
+      var circlesR = {
+        maxR: 500,
+        meanR: 250,
+        minR: 10
+      };
+      for (var circle in circlesR){
+        svg += svg += "<circle class='legend-circle' id='" + circle + "' fill='#000000' fill-opacity='0.8' stroke='#ffffff' cs='40'/>";
+        //text string
+        svg += "<text id='" + circle + "-text' x='85' y='" + circlesR[circle] + "'></text>";
+      };
+      svg += "</svg>"
+      $(container).append("<class='label' id='label' title='label'>Swedish Raids</class>");
+      $(container).append("<class='detail' id='detail' title='detail'>(by century)</class>");
+      $(container).append(svg);
+      return container;
+    }
+  });
+  map.addControl (new LegendControl);
+  updateLegendSwedes(map, attributes);
+};
+
+
+//function to update the timestamp box
+function updateLegend(feature, attribute, layer){
+  if (attribute.includes("SwedesRaid")){
+    var content = feature.properties.RaidCentury;
+  } else {
+    var content = "Century"
+  }
+  console.log(content);
+  $(".timestamp-container").text(content);
+};
+
+
+//function to update the Swedish legend
+function updateLegendSwedes(map, attribute){
+  var circleValuesSwede = getCircleValuesSwede(swedeSize, attribute)
+  for (var key in circleValuesSwede){
+    //get the radius
+    var radius = calcPropRadius(circleValuesSwede[key]);
+    //assign the cy and r attributes
+    $("#"+key).attr({
+      cy:  130 - radius,
+      r: radius / 2
+    });
+    //add legend text
+    $("#"+key+'-text').text(radius + "raids");
+  };
+};
+
+//put norwegians/dane legends here if going to do that
+
+//function to calculate the max, mean, and min values for a given attribute
+function getCircleValuesSwede(map, attribute){
+  var minR = 10,
+      maxR = 1000;
+  map.eachLayer (function(layer){
+    //get the attribute value
+    if (layer.feature){
+      var attributeValue = Number(layer.feature.properties[attribute]);
+
+      //test for min
+      if (attributeValue < minR){
+        minR = attributeValue
+      };
+      //test for max
+      if (attributeValue > maxR){
+        maxR = attributeValue;
+      };
+    };
+  });
+  //set mean
+  var meanR = (maxR + minR) / 2;
+  //return values as an object
+  return {
+    maxR: maxR,
+    minR: minR,
+    meanR: meanR
+  };
+};
+
+
+//function to calculate the max, mean, and min values for a given attribute
+function getCircleValuesNorwegian(map, attribute){
+  var minR = 10,
+      maxR = 1000;
+  map.eachLayer (function(layer){
+    //get the attribute value
+    if (layer.feature){
+      var attributeValue = Number(layer.feature.properties[attribute]);
+
+      //test for min
+      if (attributeValue < minR){
+        minR = attributeValue
+      };
+      //test for max
+      if (attributeValue > maxR){
+        maxR = attributeValue;
+      };
+    };
+  });
+  //set mean
+  var meanR = (maxR + minR) / 2;
+  //return values as an object
+  return {
+    maxR: maxR,
+    minR: minR,
+    meanR: meanR
+  };
+};
+
+//function to calculate the max, mean, and min values for a given attribute
+function getCircleValuesDane(map, attribute){
+  var minR = 10,
+      maxR = 1000;
+  map.eachLayer (function(layer){
+    //get the attribute value
+    if (layer.feature){
+      var attributeValue = Number(layer.feature.properties[attribute]);
+
+      //test for min
+      if (attributeValue < minR){
+        minR = attributeValue
+      };
+      //test for max
+      if (attributeValue > maxR){
+        maxR = attributeValue;
+      };
+    };
+  });
+
+  //set mean
+  var meanR = (maxR + minR) / 2;
+  //return values as an object
+  return {
+    maxR: maxR,
+    minR: minR,
+    meanR: meanR
+  };
 };
 
 
@@ -238,7 +411,7 @@ function processData(data){
   //push each attribute name into attributes array
   for (var attribute in properties){
     //take attributes
-    if (attribute.indexOf("Raid_") > -1){
+    if (attribute.indexOf("Raid") > -1){
       attributes.push(attribute)
     };
   };
@@ -248,8 +421,19 @@ function processData(data){
   return attributes;
 };
 
+/*
+//function to clear layers
+function clearLayer(map, attribute, layer){
+  map.eachLayer(function(layer){
+    if (layer.feature) {
+      var jsonLayer = layer;
+      map.removeLayer(jsonLayer);
+    };
+  });
+};*/
 
-//function to get Swedish raid data
+
+//function to get Swedish raid data and put it on the map
 function getSwedes(map, swedes, norwegians, danes){
   //load Swedish Viking raid data
   $.ajax("data/swedes.geojson", {
@@ -258,12 +442,13 @@ function getSwedes(map, swedes, norwegians, danes){
       //create attributes array
       var attributes = processData(response);
       //call function to create symbols
-      createCirclesSwedes(response, swedes, attributes);
+      createPropSymbolsSwedes(response, swedes, attributes);
       //createSequenceControls(map, swedes, norwegians, danes, attributes);
+      swedeRouteLines(map, routeStaraya);
     }
   });
 };
-//function to get Norwegian raid data
+//function to get Norwegian raid data and put it on the map
 function getNorwegians(map, swedes, norwegians, danes){
   //load Norwegian Viking raid data
   $.ajax("data/norwegians.geojson", {
@@ -272,69 +457,138 @@ function getNorwegians(map, swedes, norwegians, danes){
       //create attributes array
       var attributes = processData(response);
       //call function to create symbols
-      createCirclesNorwegians(response, norwegians, attributes);
+      createPropSymbolsNorwegians(response, norwegians, attributes);
       //createSequenceControls(map, swedes, norwegians, danes, attributes);
     }
   });
 };
-//function to get Danish raid data
+//function to get Danish raid data and put it on the map
 function getDanes (map, swedes, norwegians, danes){
   //load Danish Viking raid data
   $.ajax("data/danes.geojson", {
     dataType: "json",
     success: function(response){
-
       //create attributes array
       var attributes = processData(response);
       //call function to create symbols
-      createCirclesDanes(response, danes, attributes);
+      createPropSymbolsDanes(response, danes, attributes);
       createSequenceControls(map, swedes, norwegians, danes, attributes);
     }
   });
 };
 
 
-//function to update legend
-function updateLegend(map, attributes){
-  var content = "Year: ";
-  $(".timestamp-container").text(content);
-};
+//function to update Swedish Viking symbols
+function updatePropSymbolsSwedes(swedeSize, map, attribute){
+  swedeSize.eachLayer(function(layer){
+    //attribute is called originally for the Danes layer, so it needs to be replaced with Swedes
+    var attributeSwedes = attribute.replace("Danes", "Swedes")
 
-//function to create a time box
-function createTemporalLegend(map, attributes){
-  var LegendControl = L.Control.extend({
-    options:{
-      position: "topleft"
-    },
+    if(layer.feature && layer.feature.properties[attributeSwedes]){
+      //access feature properties
+      var props = layer.feature.properties;
 
-    onAdd: function(map){
-      //create the container
-      var timestamp = L.DomUtil.create("div", "timestamp-container");
-      $(timestamp).append("<div id='timestamp-container'>");
-      return timestamp;
+      //update each feature's radius based on new attribute values
+      var radius = calcPropRadius(props[attributeSwedes]);
+      layer.setRadius(radius);
+
+      //call the create popup function
+      createPopUp(props, attributeSwedes, layer, radius);
+      //updateLegendSwe(map, attributeSwedes);
     }
   });
-  map.addControl(new LegendControl());
-  updateLegend(map, attributes);
 };
 
-//function to update symbols
-function updateSymbolsSwedes(swedeSize, map, attribute){
-  alert("wtf");
-  swedeSize.eachLayer(function(layer){
+//function to update Norwegian Viking symbols
+function updatePropSymbolsNorwegians(norwegianSize, map, attribute){
+  norwegianSize.eachLayer(function(layer){
+    //attribute is called originally for the Danes layer, so it needs to be replaced with Norwegians
+    var attributeNorwegians = attribute.replace("Danes", "Norwegians")
+
+    if(layer.feature && layer.feature.properties[attributeNorwegians]){
+      //access feature properties
+      var props = layer.feature.properties;
+
+      //update each feature's radius based on new attribute values
+      var radius = calcPropRadius(props[attributeNorwegians]);
+      console.log(radius);
+      layer.setRadius(radius);
+
+      //call the create popup function
+      createPopUp(props, attributeNorwegians, layer, radius);
+      //updateLegendNor(map, attributeNorwegians);
+    }
+  });
+};
+
+//function to update Danish Viking symbols
+function updatePropSymbolsDanes(daneSize, map, attribute){
+  daneSize.eachLayer(function(layer){
     if(layer.feature && layer.feature.properties[attribute]){
       //access feature properties
-      var prop = layer.feature.properties;
+      var props = layer.feature.properties;
 
+      //update each feature's radius based on new attribute values
+      var radius = calcPropRadius(props[attribute]);
+      console.log(radius);
+      layer.setRadius(radius);
+
+      //call the create popup function
+      createPopUp(props, attribute, layer, radius);
       updateLegend(map, attribute);
-      $(".timestamp-container").text("Year: " + feature.properties.Raid_700s);
+      $(".timestamp-container").text("Century: ");
     }
   });
 };
+
+
+//function to create popup content
+function createPopUp(properties, attributes, layer, radius){
+  //create popup content variable and add location and date to it
+  var popupContent = " ";
+
+  //specify the label by Viking group
+  if (attributes.includes("Swedes")){
+    popupContent += "<p><b>Place:</b> " + properties.RaidLocation + "</p>" + "<p><b>Raided in: </b> " + properties.RaidDate + "</p>";
+  } else
+  if (attributes.includes("Norwegians")){
+    popupContent += "<p><b>Place:</b> " + properties.RaidLocation + "</p>" + "<p><b>Raided in: </b> " + properties.RaidDates + "</p>";
+  } else
+  if (attributes.includes("Danes")){
+    popupContent += "<p><b>Place:</b> " + properties.RaidLocation + "</p>" + "<p><b>Raided in: </b>" + properties.RaidDates + "</p>";
+  }
+  layer.bindPopup(popupContent, {
+    offset: new L.Point(0,1)
+  });
+};
+
 
 //spider?
 
-//flow lines?
+/*
+//function to create travel lines
+function swedeRouteLines(map, routeStaraya, routeNovgorod){
+  for (var i = 0, latlngs = [], len = routeStaraya.length; i < len; i++) {
+    latlngs.push(new L.LatLng(routeStaraya[i][0], routeStaraya[i][1]));
+  }
+  var path1 = L.polyline(latlngs);
 
+  map.fitBounds(L.latLngBounds(latlngs));
 
+  map.addLayer(path1);
+
+  path1.bindPopup("Hello");
+
+  function snake(){
+    path1.snakeIn();
+  }
+
+  path1.on("snakestart snake snakeend", function(ev){
+    console.log(ev.type);
+  });
+};
+*/
+
+//DON'T FORGET TO RE-ENABLE THE SPLASH SCREEN!!!!!! (in html too)
+//when re-enabling route lines, don't forget to activate code line in getData block
 $(document).ready(createMap);
