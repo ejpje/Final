@@ -97,7 +97,7 @@ console.log(attribute);
 
   //for each feature, determine its value for the selected attribute
   var attValue = Number(feature.properties[attribute]);
-console.log(attValue);
+  console.log(attValue);
   //create circle marker layer
   var layer = L.circleMarker(latlng, options);
 
@@ -122,8 +122,6 @@ console.log(attValue);
 
 //function to calculate the radius of each proportional symbol
 function calcPropRadius(attValue){
-  console.log(attValue);
-
   //scale factor to adjust symbol size evenly
   var scaleFactor = 50;
   //area based on attribute value and scale factor
@@ -213,19 +211,20 @@ function createSequenceControls(map, swedes, norwegians, danes, attributes){
       //if past the first attribute then wrap around to the last
       index = index < 3 ? 6 : index;
     };
-
     //update slider
     $(".range-slider").val(index);
+    console.log(index);
     //update symbols here
-    updatePropSymbolsSwedes(swedeSize, map, attributes[index]);
-    updatePropSymbolsNorwegians(norwegianSize, map, attributes[index]);
+    //updatePropSymbolsSwedes(swedeSize, map, attributes[index]);
+    //updatePropSymbolsNorwegians(norwegianSize, map, attributes[index]);
     updatePropSymbolsDanes(daneSize, map, attributes[index]);
   });
+
   $(".range-slider").on("input", function(){
     //get the new index value
     var index = $(this).val();
-    updatePropSymbolsSwedes(swedeSize, map, attributes[index]);
-    updatePropSymbolsNorwegians(norwegianSize, map, attributes[index]);
+  //  updatePropSymbolsSwedes(swedeSize, map, attributes[index]);
+  //  updatePropSymbolsNorwegians(norwegianSize, map, attributes[index]);
     updatePropSymbolsDanes(daneSize, map, attributes[index]);
   });
 };
@@ -270,7 +269,7 @@ function createLegendSwedes(map, attributes){
         svg += "<text id='" + circle + "-text' x='85' y='" + circlesR[circle] + "'></text>";
       };
       svg += "</svg>"
-      $(container).append("<class='label' id='label' title='label'>Swedish Raids</class>");
+      $(container).append("<class='label' id='label' title='label'>Raids </class>");
       $(container).append("<class='detail' id='detail' title='detail'>(by century)</class>");
       $(container).append(svg);
       return container;
@@ -282,16 +281,11 @@ function createLegendSwedes(map, attributes){
 
 
 //function to update the timestamp box
-function updateLegend(feature, attribute, layer){
-  if (attribute.includes("SwedesRaid")){
-    var content = feature.properties.RaidCentury;
-  } else {
-    var content = "Century"
-  }
-  console.log(content);
-  $(".timestamp-container").text(content);
-};
+function updateLegend(feature, attributes, properties, layer){
+  var attribute = attributes[3];
 
+  $(".timestamp-container").text("Century: " + attribute.split("_")[1]);
+};
 
 //function to update the Swedish legend
 function updateLegendSwedes(map, attribute){
@@ -309,9 +303,8 @@ function updateLegendSwedes(map, attribute){
   };
 };
 
-//put norwegians/dane legends here if going to do that
 
-//function to calculate the max, mean, and min values for a given attribute
+//function to calculate the max, mean, and min values for the Swede symbols
 function getCircleValuesSwede(map, attribute){
   var minR = 10,
       maxR = 1000;
@@ -339,9 +332,7 @@ function getCircleValuesSwede(map, attribute){
     meanR: meanR
   };
 };
-
-
-//function to calculate the max, mean, and min values for a given attribute
+//function to calculate the max, mean, and min values the Norwegian symbols
 function getCircleValuesNorwegian(map, attribute){
   var minR = 10,
       maxR = 1000;
@@ -369,8 +360,7 @@ function getCircleValuesNorwegian(map, attribute){
     meanR: meanR
   };
 };
-
-//function to calculate the max, mean, and min values for a given attribute
+//function to calculate the max, mean, and min values for the Dane symbols
 function getCircleValuesDane(map, attribute){
   var minR = 10,
       maxR = 1000;
@@ -389,7 +379,6 @@ function getCircleValuesDane(map, attribute){
       };
     };
   });
-
   //set mean
   var meanR = (maxR + minR) / 2;
   //return values as an object
@@ -406,7 +395,7 @@ function processData(data){
   //empty array to hold attributes
   var attributes = [];
   //properties of the first feature in the dataset
-  var properties = data.features[0].properties;
+  var properties = data.features[3].properties;
   console.log(properties);
   //push each attribute name into attributes array
   for (var attribute in properties){
@@ -444,7 +433,7 @@ function getSwedes(map, swedes, norwegians, danes){
       //call function to create symbols
       createPropSymbolsSwedes(response, swedes, attributes);
       //createSequenceControls(map, swedes, norwegians, danes, attributes);
-      swedeRouteLines(map, routeStaraya);
+      //swedeRouteLines(map, routeStaraya);
     }
   });
 };
@@ -530,13 +519,13 @@ function updatePropSymbolsDanes(daneSize, map, attribute){
 
       //update each feature's radius based on new attribute values
       var radius = calcPropRadius(props[attribute]);
-      console.log(radius);
+
       layer.setRadius(radius);
 
       //call the create popup function
       createPopUp(props, attribute, layer, radius);
       updateLegend(map, attribute);
-      $(".timestamp-container").text("Century: ");
+      $(".timestamp-container").text("Century: " + attribute.split("_")[1]);
     }
   });
 };
