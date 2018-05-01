@@ -203,7 +203,7 @@ function createSequenceControls(map, swedes, norwegians, danes, attributes){
     }
   });
 
-  createTimeBox(map, attributes[0]);
+  createTimeBox(map, attributes);
   createLegendSwedes(map, attributes[0]);
 
   map.addControl(new SequenceControl());
@@ -249,13 +249,13 @@ function createSequenceControls(map, swedes, norwegians, danes, attributes){
 function createTimeBox(map, attributes){
   var LegendControl = L.Control.extend({
     options:{
-      position: "topleft"
+      position: "topleft",
     },
 
     onAdd: function(map){
       //create the temporal legend container
       var timestamp = L.DomUtil.create("div", "timestamp-container");
-      $(timestamp).append("<div id='timestamp-container'>");
+      $(timestamp).append();
       return timestamp;
     }
   });
@@ -303,7 +303,7 @@ function createLegendSwedes(map, attributes){
     }
   });
   map.addControl (new LegendControl);
-  updateLegendSwedes(map, attributes[0]);
+  updateLegendSwedes(map, attributes);
 };
 
 
@@ -311,7 +311,7 @@ function createLegendSwedes(map, attributes){
 function updateTimeBox(feature, attributes, properties, layer){
   var attribute = attributes[0];
 
-  $(".timestamp-container").text("Century: " + attribute.split("_")[0]);
+  $(".timestamp-container").text("Century: " + attribute.split("_")[1]);
 };
 
 
