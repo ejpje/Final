@@ -1,9 +1,9 @@
 /*Script by Emily Pettit, 2018*/
-/*
+
 //splash screen
 $(document).click(function(){
   $("#welcomeWrapper").hide();
-});*/
+});
 
 //function to create the Leaflet map
 function createMap(){
@@ -63,12 +63,11 @@ function onEachFeature(feature, layer){
 //function to convert markers to circles
 function pointToLayer(feature, latlng, attributes){
   var attribute = attributes[0];
-console.log(attribute);
 
   //create marker options
   if (attribute.includes("SwedesRaid")){
     var options = {
-      radius: 6,
+      radius: 5,
       fillColor: "#fff600",
       color: "#000",
       weight: 1,
@@ -77,7 +76,7 @@ console.log(attribute);
     };
   } else if (attribute.includes("NorwegiansRaid")){
     var options = {
-      radius: 6,
+      radius: 5,
       fillColor: "#0d00cc",
       color: "#000",
       weight: 1,
@@ -86,7 +85,7 @@ console.log(attribute);
     };
   } else if (attribute.includes("DanesRaid")){
     var options = {
-      radius: 6,
+      radius: 5,
       fillColor: "#e20000",
       color: "#000",
       weight: 1,
@@ -97,7 +96,6 @@ console.log(attribute);
 
   //for each feature, determine its value for the selected attribute
   var attValue = Number(feature.properties[attribute]);
-  console.log(attValue);
 
   if (attValue == 0){
     var hide = {
@@ -141,7 +139,7 @@ function calcPropRadius(attValue){
   //area based on attribute value and scale factor
   var area = attValue * scaleFactor;
   //radius calculated based on area
-  var radius = (Math.sqrt(area/Math.PI))*(5);
+  var radius = (Math.sqrt(area/Math.PI))*(2);
 
   return radius;
 };
@@ -185,20 +183,22 @@ function createSequenceControls(map, swedes, norwegians, danes, attributes){
     onAdd: function(map){
       //create the container div for the slider
       var slider = L.DomUtil.create("div", "range-slider-container");
+
+      //create range input element (the slider)
       $(slider).append("<input class='range-slider' type='range' max=3 min=0 value=0 step=1>");
 
       //add skip buttons here
       $(slider).append("<button class='skip' id='forward' title='Forward'>Forward</button>");
       $(slider).append("<button class='skip' id='reverse' title='Reverse'>Reverse</button>");
 
-      $(slider).on("mousedown dblclick", function(e){
+      $(slider).on("mousedown dblclick pointerdown", function(e){
         L.DomEvent.stopPropagation(e);
       });
 
-      //stops the map from being dragged when the slider is moved
+      /*//stops the map from being dragged when the slider is moved
       $(slider).on("mousedown", function(){
         map.dragging.disable();
-      });
+      });*/
       return slider;
     }
   });
@@ -226,15 +226,15 @@ function createSequenceControls(map, swedes, norwegians, danes, attributes){
       //if past the first attribute then wrap around to the last
       index = index < 0 ? 3 : index;
     };
+
     //update slider
     $(".range-slider").val(index);
-    console.log(index);
-    //update symbols here
     updatePropSymbolsSwedes(swedeSize, map, attributes[index]);
     updatePropSymbolsNorwegians(norwegianSize, map, attributes[index]);
     updatePropSymbolsDanes(daneSize, map, attributes[index]);
   });
 
+  //input listener for the slider
   $(".range-slider").on("input", function(){
     //get the new index value
     var index = $(this).val();
@@ -281,9 +281,9 @@ function createLegendSwedes(map, attributes){
       var svg = "<svg id='attribute-legend' width='150px' height='120px'>";
       //positioning of circle labels
       var circlesR = {
-        maxR: 60,
-        meanR: 80,
-        minR: 110
+        maxR: 110,
+      //  meanR: 80,
+        //minR: 110
       };
       //loop to add each circle and text to svg string
       for (var circle in circlesR){
@@ -295,8 +295,6 @@ function createLegendSwedes(map, attributes){
       //close svg string
       svg += "</svg>"
       //add attribute legend svg to container
-      $(container).append("<class='label' id='label' title='label'>Raids </class>");
-      $(container).append("<class='detail' id='detail' title='detail'>(by century)</class>");
       $(container).append(svg);
 
       return container;
@@ -457,7 +455,6 @@ function getSwedes(map, swedes, norwegians, danes){
       var attributes = processData(response);
       //call function to create symbols
       createPropSymbolsSwedes(response, swedes, attributes);
-      //createSequenceControls(map, swedes, norwegians, danes, attributes);
       //swedeRouteLines(map, routeStaraya);
     }
   });
@@ -472,7 +469,6 @@ function getNorwegians(map, swedes, norwegians, danes){
       var attributes = processData(response);
       //call function to create symbols
       createPropSymbolsNorwegians(response, norwegians, attributes);
-      //createSequenceControls(map, swedes, norwegians, danes, attributes);
     }
   });
 };
@@ -562,13 +558,13 @@ function createPopUp(properties, attribute, layer, radius){
 
   //specify the label by Viking group
   if (attribute.includes("Swedes")){
-    popupContent += "<p><b>Place:</b> " + properties.Location + "</p>" + "<p><b>Century: </b> " + attribute.split("_")[1] + "</p>" + "<p><b>Raids: </b>" + properties[attribute] + "</p>";;
+    popupContent += "<p><b>Place:</b> " + properties.Location + "</p>" + "<p><b>Raid Date(s): </b> " + properties.RaidDate + "</p>" + "<p><b>Number of Raids in " + attribute.split("_")[1] + "s: </b>" + properties[attribute] + "</p>";;
   } else
   if (attribute.includes("Norwegians")){
-    popupContent += "<p><b>Place:</b> " + properties.Location + "</p>" + "<p><b>Raided in: </b> " + attribute.split("_")[1] + "</p>" + "<p><b>Raids: </b>" + properties[attribute] + "</p>";;
+    popupContent += "<p><b>Place:</b> " + properties.Location + "</p>" + "<p><b>Raid Date(s): </b> " + properties.RaidDate + "</p>" + "<p><b>Number of Raids in " + attribute.split("_")[1] + "s: </b>" + properties[attribute] + "</p>";;
   } else
   if (attribute.includes("Danes")){
-    popupContent += "<p><b>Place:</b> " + properties.Location + "</p>" + "<p><b>Raided in: </b>" + attribute.split("_")[1] + "</p>" + "<p><b>Raids: </b>" + properties[attribute] + "</p>";;
+    popupContent += "<p><b>Place:</b> " + properties.Location + "</p>" + "<p><b>Raid Date(s): </b>" + properties.RaidDate + "</p>" + "<p><b>Number of Raids in " + attribute.split("_")[1] + "s: </b>" + properties[attribute] + "</p>";;
   }
   layer.bindPopup(popupContent, {
     offset: new L.Point(0,1)
@@ -597,6 +593,5 @@ function swedeRouteLines(map, routeStaraya, routeNovgorod){
 };
 */
 
-//DON'T FORGET TO RE-ENABLE THE SPLASH SCREEN!!!!!! (in html too)
 //when re-enabling route lines, don't forget to activate code line in getData block
 $(document).ready(createMap);
