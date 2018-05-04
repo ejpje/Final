@@ -1,9 +1,21 @@
 /*Script by Emily Pettit, 2018*/
-
-//splash screen
+/*
+//welcome screen
 $(document).click(function(){
   $("#welcomeWrapper").hide();
+});*/
+
+
+var settlementIcon = L.Icon.extend({
+  options: {
+    iconSize: [18, 55],
+    popupAnchor: [0, -10]
+  }
 });
+
+var daneIcon = new settlementIcon({iconUrl: "img/danesSet.svg"}), //icon courtesy of Julynn B. and The Noun Project
+    swedeIcon = new settlementIcon({iconUrl: "img/swedesSet.svg"}), //icon courtesy of Julynn B. and The Noun Project
+    norwegianIcon = new settlementIcon({iconUrl: "img/norwegiansSet.svg"}); //icon courtesy of Julynn B. and The Noun Project
 
 //function to create the Leaflet map
 function createMap(){
@@ -65,7 +77,34 @@ function pointToLayer(feature, latlng, attributes){
   var attribute = attributes[0];
 
   //create marker options
-  if (attribute.includes("SwedesRaid")){
+  if (feature.properties.SwedesRaidSettlement == 1){
+    var options = {
+      radius: 5,
+      fillColor: "#dbc500",
+      color: "#000",
+      weight: 1,
+      opacity: 1,
+      fillOpacity: 0.8
+    };
+  } else if (feature.properties.NorwegianRaidSettlement == 1){
+    var options = {
+      radius: 5,
+      fillColor: "#021e66",
+      color: "#000",
+      weight: 1,
+      opacity: 1,
+      fillOpacity: 0.8
+    };
+  } else if (feature.properties.DanesRaidSettlement == 1){
+    var options = {
+      radius: 5,
+      fillColor: "#660207",
+      color: "#000",
+      weight: 1,
+      opacity: 1,
+      fillOpacity: 0.8
+    };
+  } else if (attribute.includes("SwedesRaid")){
     var options = {
       radius: 5,
       fillColor: "#fff600",
@@ -97,24 +136,13 @@ function pointToLayer(feature, latlng, attributes){
   //for each feature, determine its value for the selected attribute
   var attValue = Number(feature.properties[attribute]);
 
-  if (attValue == 0){
-    var hide = {
-      radius: 0,
-      fillColor: "#ffffff",
-      color: "#000",
-      weight: 0,
-      opacity: 0,
-      fillOpacity: 0
-    };
-  }
-
   options.radius = calcPropRadius(attValue);
 
   //create circle marker layer
-  var layer = L.circleMarker(latlng, options, hide);
+  var layer = L.circleMarker(latlng, options);
 
   //call the create popup function
-  createPopUp(feature.properties, attribute, layer, options, hide);
+  createPopUp(feature.properties, attribute, layer, options);
 
   //event listeners to open popup on mouse movement
   layer.on({
@@ -194,11 +222,6 @@ function createSequenceControls(map, swedes, norwegians, danes, attributes){
       $(slider).on("mousedown dblclick pointerdown", function(e){
         L.DomEvent.stopPropagation(e);
       });
-
-      /*//stops the map from being dragged when the slider is moved
-      $(slider).on("mousedown", function(){
-        map.dragging.disable();
-      });*/
       return slider;
     }
   });
@@ -333,8 +356,6 @@ function updateLegendSwedes(swedeSize, attribute){
     $("#"+key+'-text').text(Math.round(circleValuesSwede[key]*100)/100 + " raids");
   };
 };
-
-
 //function to calculate the max, mean, and min values for the Swede symbols
 function getCircleValuesSwede(map, attribute){
   var minR = Infinity,
@@ -364,7 +385,6 @@ function getCircleValuesSwede(map, attribute){
     meanR: meanR
   };
 };
-
 //function to calculate the max, mean, and min values the Norwegian symbols
 function getCircleValuesNorwegian(map, attribute){
   var minR = Infinity,
@@ -444,7 +464,7 @@ function processData(data){
   return attributes;
 };
 
-
+///////
 //function to get Swedish raid data and put it on the map
 function getSwedes(map, swedes, norwegians, danes){
   //load Swedish Viking raid data
@@ -487,6 +507,48 @@ function getDanes (map, swedes, norwegians, danes){
   });
 };
 
+
+
+//function to get Swedish settlement data and put it on the map
+function getSwedishSets (map, swedesSet, norwegiansSet, danesSet){
+  //load Swedish data
+  $.ajax("data/swedishSet.geojson", {
+    dataType: "json",
+    success: function(response){
+      //create attributes array
+      var attributes = processData(response);
+      //call function to create symbols
+      createSettlementSymbolsSwedes(response, swedesSet, attributes);
+    }
+  });
+};
+//function to get Norwegian settlement data and put it on the map
+function getNorwegianSets (map, swedesSet, norwegiansSet, danesSet){
+  //load Norwegian data
+  $.ajax("data/norwegianSet.geojson", {
+    dataType: "json",
+    success: function(response){
+      //create attributes array
+      var attributes = processData(response);
+      //call function to create symbols
+      createSettlementSymbolsNorwegians(response, norwegiansSet, attributes);
+    }
+  });
+};
+//function to get Danish settlement data and put it on the map
+function getDaneSets (map, swedesSet, norwegiansSet, danesSet){
+  //load Danish data
+  $.ajax("data/daneSet.geojson", {
+    dataType: "json",
+    success: function(response){
+      //create attributes array
+      var attributes = processData(response);
+      //call function to create symbols
+      createSettlementSymbolsDanes(response, danesSet, attributes);
+    }
+  });
+};
+//////
 
 //function to update Swedish Viking symbols
 function updatePropSymbolsSwedes(swedeSize, map, attribute){
@@ -557,22 +619,30 @@ function createPopUp(properties, attribute, layer, radius){
   var popupContent = " ";
 
   //specify the label by Viking group
-  if (attribute.includes("Swedes")){
-    popupContent += "<p><b>Place:</b> " + properties.Location + "</p>" + "<p><b>Raid Date(s): </b> " + properties.RaidDate + "</p>" + "<p><b>Number of Raids in " + attribute.split("_")[1] + "s: </b>" + properties[attribute] + "</p>";;
+  if (properties.SwedesRaidSettlement == 1){
+    popupContent += "<p><b>Place:</b> " + properties.Location + "</p>" + "<p><b>Settlement Date: </b> " + properties.RaidDate + "</p>";
   } else
-  if (attribute.includes("Norwegians")){
-    popupContent += "<p><b>Place:</b> " + properties.Location + "</p>" + "<p><b>Raid Date(s): </b> " + properties.RaidDate + "</p>" + "<p><b>Number of Raids in " + attribute.split("_")[1] + "s: </b>" + properties[attribute] + "</p>";;
+  if (properties.NorwegianRaidSettlement == 1){
+    popupContent += "<p><b>Place:</b> " + properties.Location + "</p>" + "<p><b>Settlement Date: </b> " + properties.RaidDate + "</p>";
   } else
-  if (attribute.includes("Danes")){
-    popupContent += "<p><b>Place:</b> " + properties.Location + "</p>" + "<p><b>Raid Date(s): </b>" + properties.RaidDate + "</p>" + "<p><b>Number of Raids in " + attribute.split("_")[1] + "s: </b>" + properties[attribute] + "</p>";;
+  if (properties.DanesRaidSettlement == 1){
+    popupContent += "<p><b>Place:</b> " + properties.Location + "</p>" + "<p><b>Settlement Date: </b> " + properties.RaidDate + "</p>";
+  } else
+  if (attribute.includes("SwedesRaid")){
+    popupContent += "<p><b>Place:</b> " + properties.Location + "</p>" + "<p><b>Raid Date(s): </b> " + properties.RaidDate + "</p>" + "<p><b>Number of Raids in " + attribute.split("_")[1] + "s: </b>" + properties[attribute] + "</p>";
+  } else
+  if (attribute.includes("NorwegiansRaid")){
+    popupContent += "<p><b>Place:</b> " + properties.Location + "</p>" + "<p><b>Raid Date(s): </b> " + properties.RaidDate + "</p>" + "<p><b>Number of Raids in " + attribute.split("_")[1] + "s: </b>" + properties[attribute] + "</p>";
+  } else
+  if (attribute.includes("DanesRaid")){
+    popupContent += "<p><b>Place:</b> " + properties.Location + "</p>" + "<p><b>Raid Date(s): </b>" + properties.RaidDate + "</p>" + "<p><b>Number of Raids in " + attribute.split("_")[1] + "s: </b>" + properties[attribute] + "</p>";
   }
+
   layer.bindPopup(popupContent, {
     offset: new L.Point(0,1)
   });
 };
 
-
-//spider?
 
 /*
 //function to create travel lines
