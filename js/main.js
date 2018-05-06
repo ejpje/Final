@@ -1,11 +1,11 @@
 /*Script by Emily Pettit, 2018*/
-/*
+
 //welcome screen
 $(document).click(function(){
   $("#welcomeWrapper").hide();
-});*/
+});
 
-
+//create global variable for icons
 var settlementIcon = L.Icon.extend({
   options: {
     iconSize: [18, 55],
@@ -13,9 +13,11 @@ var settlementIcon = L.Icon.extend({
   }
 });
 
+//specify the different settlement icons
 var daneIcon = new settlementIcon({iconUrl: "img/danesSet.svg"}), //icon courtesy of Julynn B. and The Noun Project
     swedeIcon = new settlementIcon({iconUrl: "img/swedesSet.svg"}), //icon courtesy of Julynn B. and The Noun Project
     norwegianIcon = new settlementIcon({iconUrl: "img/norwegiansSet.svg"}); //icon courtesy of Julynn B. and The Noun Project
+
 
 //function to create the Leaflet map
 function createMap(){
@@ -53,6 +55,23 @@ function createMap(){
     "Danish": danes,
   };
 
+  //Swedish settlements
+  L.marker([57.4684, 18.4867], {icon: swedeIcon}).addTo(swedes).bindPopup("<p><b>Place:</b> Gotland, Sweden</p>" + "<p><b>Settlement Date: </b>700</p>");
+  L.marker([59.326,	17.5667], {icon: swedeIcon}).addTo(swedes).bindPopup("<p><b>Place:</b> Birka, Sweden</p>" + "<p><b>Settlement Date: </b>780</p>");
+  L.marker([60.0016,	32.2926], {icon: swedeIcon}).addTo(swedes).bindPopup("<p><b>Place:</b> Staraja Ladoga, Russia</p>" + "<p><b>Settlement Date: </b>800</p>");
+  L.marker([58.5256,	31.2742], {icon: swedeIcon}).addTo(swedes).bindPopup("<p><b>Place:</b> Novgorod, Russia</p>" + "<p><b>Settlement Date: </b>800</p>");
+  L.marker([60.0299,	37.8057], {icon: swedeIcon}).addTo(swedes).bindPopup("<p><b>Place:</b> Beloozero, Russia</p>" + "<p><b>Settlement Date: </b>850</p>");
+  L.marker([59.6191,	17.7234], {icon: swedeIcon}).addTo(swedes).bindPopup("<p><b>Place:</b> Sigtuna, Sweden</p>" + "<p><b>Settlement Date: </b>960</p>");
+  //Norwegian settlements
+  L.marker([59.297,	10.5694], {icon: norwegianIcon}).addTo(norwegians).bindPopup("<p><b>Place:</b> Kaupang, Norway</p>" + "<p><b>Settlement Date: </b>800</p>");
+  L.marker([50.4501,	30.5234], {icon: norwegianIcon}).addTo(norwegians).bindPopup("<p><b>Place:</b> Kiev, Ukraine</p>" + "<p><b>Settlement Date: </b>860</p>");
+  L.marker([64.9631,	-19.0208], {icon: norwegianIcon}).addTo(norwegians).bindPopup("<p><b>Place:</b> Iceland</p>" + "<p><b>Settlement Date: </b>870</p>");
+  L.marker([61.8926,	-6.9118], {icon: norwegianIcon}).addTo(norwegians).bindPopup("<p><b>Place:</b> Faroe Islands</p>" + "<p><b>Settlement Date: </b>880</p>");
+  L.marker([71.7069,	-42.6043], {icon: norwegianIcon}).addTo(norwegians).bindPopup("<p><b>Place:</b> Greenland</p>" + "<p><b>Settlement Date: </b>985</p>");
+  //Danish settlements
+  L.marker([48.8799, 0.1713], {icon: daneIcon}).addTo(danes).bindPopup("<p><b>Place:</b> Normandy, France</p>" + "<p><b>Settlement Date: </b>911</p>");
+  L.marker([54.2194, 9.6961], {icon: daneIcon}).addTo(danes).bindPopup("<p><b>Place:</b> Danevirke, Germany</p>" + "<p><b>Settlement Date: </b>974</p>");
+
   //create layer control panel
   L.control.layers(baseMaps, overlayMaps, {collapsed:false}).addTo(map);
   return map;
@@ -79,8 +98,7 @@ function pointToLayer(feature, latlng, attributes){
   //create marker options
   if (feature.properties.SwedesRaidSettlement == 1){
     var options = {
-      radius: 5,
-      fillColor: "#dbc500",
+      fillColor: "#e8c900",
       color: "#000",
       weight: 1,
       opacity: 1,
@@ -88,8 +106,7 @@ function pointToLayer(feature, latlng, attributes){
     };
   } else if (feature.properties.NorwegianRaidSettlement == 1){
     var options = {
-      radius: 5,
-      fillColor: "#021e66",
+      fillColor: "#06036b",
       color: "#000",
       weight: 1,
       opacity: 1,
@@ -97,7 +114,6 @@ function pointToLayer(feature, latlng, attributes){
     };
   } else if (feature.properties.DanesRaidSettlement == 1){
     var options = {
-      radius: 5,
       fillColor: "#660207",
       color: "#000",
       weight: 1,
@@ -106,7 +122,6 @@ function pointToLayer(feature, latlng, attributes){
     };
   } else if (attribute.includes("SwedesRaid")){
     var options = {
-      radius: 5,
       fillColor: "#fff600",
       color: "#000",
       weight: 1,
@@ -115,7 +130,6 @@ function pointToLayer(feature, latlng, attributes){
     };
   } else if (attribute.includes("NorwegiansRaid")){
     var options = {
-      radius: 5,
       fillColor: "#0d00cc",
       color: "#000",
       weight: 1,
@@ -124,7 +138,6 @@ function pointToLayer(feature, latlng, attributes){
     };
   } else if (attribute.includes("DanesRaid")){
     var options = {
-      radius: 5,
       fillColor: "#e20000",
       color: "#000",
       weight: 1,
@@ -200,6 +213,7 @@ function createPropSymbolsDanes(data, danes, attributes){
     }
   }).addTo(danes);
 };
+
 
 
 //function to create sequence controls
@@ -296,15 +310,19 @@ function createLegendSwedes(map, attributes){
     onAdd: function(map){
       //create container
       var container = L.DomUtil.create("div", "legend-control-container");
+      //create second container for the settlement icons
+      var sub = L.DomUtil.create("div", "table-of-contents"),
+        grades = ["Swedish settlements ", "Norwegian settlements ", "Danish settlements "],
+        labels = ["img/swedesSet.svg", "img/norwegiansSet.svg", "img/danesSet.svg"];
 
       //add temporal legend component
       $(container).append("<div id='temporal-legend'>");
 
       //start attribute legend svg string
-      var svg = "<svg id='attribute-legend' width='150px' height='120px'>";
+      var svg = "<svg id='attribute-legend' width='160px' height='60px'>";
       //positioning of circle labels
       var circlesR = {
-        maxR: 110,
+        maxR: 50,
       //  meanR: 80,
         //minR: 110
       };
@@ -313,15 +331,25 @@ function createLegendSwedes(map, attributes){
         //circle string
         svg += "<circle class='legend-circle' id='" + circle + "' fill='#ffffff' fill-opacity='0.8' stroke='#000000' cx='50'/>";
         //text string
-        svg += "<text id='" + circle + "-text' x='100' y='" + circlesR[circle] + "'></text>";
+        svg += "<text id='" + circle + "-text' x='90' y='" + circlesR[circle] + "'></text>";
       };
       //close svg string
       svg += "</svg>"
       //add attribute legend svg to container
       $(container).append(svg);
+      //add table of contents legend to container
+      $(container).append(sub);
+
+      //loop to add icons to the table of contents legend with labels
+      for (var i = 0; i < grades.length; i++) {
+        sub.innerHTML +=
+          grades[i] + ("<img src=" + labels[i] + " height='20' width='20'>") + "<br>";
+      };
+      $(container).append(sub);
 
       return container;
     }
+
   });
   map.addControl (new LegendControl);
   updateLegendSwedes(map, attributes);
@@ -336,7 +364,7 @@ function updateTimeBox(feature, attributes, properties, layer){
 };
 
 
-//function to update the Swedish legend
+//function to update the attribute legend
 function updateLegendSwedes(swedeSize, attribute){
   var year = attribute.split("_")[1];
   var content = "Raids in " + year;
@@ -349,13 +377,15 @@ function updateLegendSwedes(swedeSize, attribute){
     var radius = calcPropRadius(circleValuesSwede[key]);
     //assign the cy and r attributes
     $("#"+key).attr({
-      cy: 110 - radius,
+      cy: 55 - radius,
       r: radius
     });
     //add legend text
     $("#"+key+'-text').text(Math.round(circleValuesSwede[key]*100)/100 + " raids");
   };
 };
+
+
 //function to calculate the max, mean, and min values for the Swede symbols
 function getCircleValuesSwede(map, attribute){
   var minR = Infinity,
@@ -464,7 +494,7 @@ function processData(data){
   return attributes;
 };
 
-///////
+
 //function to get Swedish raid data and put it on the map
 function getSwedes(map, swedes, norwegians, danes){
   //load Swedish Viking raid data
@@ -479,6 +509,7 @@ function getSwedes(map, swedes, norwegians, danes){
     }
   });
 };
+
 //function to get Norwegian raid data and put it on the map
 function getNorwegians(map, swedes, norwegians, danes){
   //load Norwegian Viking raid data
@@ -492,6 +523,7 @@ function getNorwegians(map, swedes, norwegians, danes){
     }
   });
 };
+
 //function to get Danish raid data and put it on the map
 function getDanes (map, swedes, norwegians, danes){
   //load Danish Viking raid data
@@ -507,48 +539,6 @@ function getDanes (map, swedes, norwegians, danes){
   });
 };
 
-
-
-//function to get Swedish settlement data and put it on the map
-function getSwedishSets (map, swedesSet, norwegiansSet, danesSet){
-  //load Swedish data
-  $.ajax("data/swedishSet.geojson", {
-    dataType: "json",
-    success: function(response){
-      //create attributes array
-      var attributes = processData(response);
-      //call function to create symbols
-      createSettlementSymbolsSwedes(response, swedesSet, attributes);
-    }
-  });
-};
-//function to get Norwegian settlement data and put it on the map
-function getNorwegianSets (map, swedesSet, norwegiansSet, danesSet){
-  //load Norwegian data
-  $.ajax("data/norwegianSet.geojson", {
-    dataType: "json",
-    success: function(response){
-      //create attributes array
-      var attributes = processData(response);
-      //call function to create symbols
-      createSettlementSymbolsNorwegians(response, norwegiansSet, attributes);
-    }
-  });
-};
-//function to get Danish settlement data and put it on the map
-function getDaneSets (map, swedesSet, norwegiansSet, danesSet){
-  //load Danish data
-  $.ajax("data/daneSet.geojson", {
-    dataType: "json",
-    success: function(response){
-      //create attributes array
-      var attributes = processData(response);
-      //call function to create symbols
-      createSettlementSymbolsDanes(response, danesSet, attributes);
-    }
-  });
-};
-//////
 
 //function to update Swedish Viking symbols
 function updatePropSymbolsSwedes(swedeSize, map, attribute){
@@ -644,6 +634,7 @@ function createPopUp(properties, attribute, layer, radius){
 };
 
 
+
 /*
 //function to create travel lines
 function swedeRouteLines(map, routeStaraya, routeNovgorod){
@@ -661,7 +652,7 @@ function swedeRouteLines(map, routeStaraya, routeNovgorod){
     console.log(ev.type);
   });
 };
-*/
+*///if re-enabling route lines, don't forget to activate code line in getData block
 
-//when re-enabling route lines, don't forget to activate code line in getData block
+
 $(document).ready(createMap);
