@@ -1,14 +1,14 @@
 /*Script by Emily Pettit, 2018*/
-
+/*
 //welcome screen
 $(document).click(function(){
   $("#welcomeWrapper").hide();
 });
-
+*/
 //create global variable for icons
 var settlementIcon = L.Icon.extend({
   options: {
-    iconSize: [18, 55],
+    iconSize: [15, 40],
     popupAnchor: [0, -10]
   }
 });
@@ -18,11 +18,38 @@ var daneIcon = new settlementIcon({iconUrl: "img/danesSet.svg"}), //icon courtes
     swedeIcon = new settlementIcon({iconUrl: "img/swedesSet.svg"}), //icon courtesy of Julynn B. and The Noun Project
     norwegianIcon = new settlementIcon({iconUrl: "img/norwegiansSet.svg"}); //icon courtesy of Julynn B. and The Noun Project
 
+var countries = L.layerGroup(Countries);
+
+//function to color countries
+function getColor(d) {
+  return  d == "Sweden" ? "yellow" :
+          d == "Norway" ? "blue" :
+                          "red";
+};
+
+//function to style countries
+function style(feature){
+  return {
+    fillColor: getColor(feature.properties.SOVEREIGNT),
+    weight: 0.5,
+    opacity: 0.5,
+    color: "grey",
+    fillOpacity: 0.4
+  };
+};
 
 //function to create the Leaflet map
 function createMap(){
   //create the map object
-  var map = L.map('map').setView([48, 20], 3);
+  var map = L.map("map", {
+    center: [48, 20],
+    zoom: 3,
+    minZoom: 3,
+    maxZoom: 8
+  });
+
+  L.geoJson(Countries, {style:style}).addTo(map);
+
   //specify additional datasets to add to the layer group
   var swedes = new L.geoJson().addTo(map);
   var norwegians = new L.geoJson().addTo(map);
@@ -480,7 +507,6 @@ function processData(data){
   var attributes = [];
   //properties of the first feature in the dataset
   var properties = data.features[0].properties;
-  console.log(properties);
   //push each attribute name into attributes array
   for (var attribute in properties){
     //take attributes
@@ -488,9 +514,6 @@ function processData(data){
       attributes.push(attribute)
     };
   };
-  //check results
-  console.log(attributes);
-
   return attributes;
 };
 
@@ -505,7 +528,7 @@ function getSwedes(map, swedes, norwegians, danes){
       var attributes = processData(response);
       //call function to create symbols
       createPropSymbolsSwedes(response, swedes, attributes);
-      //swedeRouteLines(map, routeStaraya);
+    //  swedeRouteLines(map, routeStaraya);
     }
   });
 };
@@ -609,13 +632,13 @@ function createPopUp(properties, attribute, layer, radius){
   var popupContent = " ";
 
   //specify the label by Viking group
-  if (properties.SwedesRaidSettlement == 1){
+  if (properties.SwedeRaidSettlement == 1){
     popupContent += "<p><b>Place:</b> " + properties.Location + "</p>" + "<p><b>Settlement Date: </b> " + properties.RaidDate + "</p>";
   } else
   if (properties.NorwegianRaidSettlement == 1){
     popupContent += "<p><b>Place:</b> " + properties.Location + "</p>" + "<p><b>Settlement Date: </b> " + properties.RaidDate + "</p>";
   } else
-  if (properties.DanesRaidSettlement == 1){
+  if (properties.DaneRaidSettlement == 1){
     popupContent += "<p><b>Place:</b> " + properties.Location + "</p>" + "<p><b>Settlement Date: </b> " + properties.RaidDate + "</p>";
   } else
   if (attribute.includes("SwedesRaid")){
@@ -634,14 +657,13 @@ function createPopUp(properties, attribute, layer, radius){
 };
 
 
-
 /*
 //function to create travel lines
 function swedeRouteLines(map, routeStaraya, routeNovgorod){
   for (var i = 0, latlngs = [], len = routeStaraya.length; i < len; i++) {
     latlngs.push(new L.LatLng(routeStaraya[i][0], routeStaraya[i][1]));
   }
-  var path1 = L.polyline(latlngs);
+  var path1 = L.polyline(latlngs, {snakingSpeed: 200});
   map.fitBounds(L.latLngBounds(latlngs));
   map.addLayer(path1);
   path1.bindPopup("Hello");
@@ -649,10 +671,13 @@ function swedeRouteLines(map, routeStaraya, routeNovgorod){
     path1.snakeIn();
   }
   path1.on("snakestart snake snakeend", function(ev){
+    alert("hey");
     console.log(ev.type);
   });
 };
-*///if re-enabling route lines, don't forget to activate code line in getData block
+//if re-enabling route lines, don't forget to activate code line in getData block
+*/
+
 
 
 $(document).ready(createMap);
