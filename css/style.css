@@ -167,3 +167,27 @@ h1 {
 .leaflet-interactive {
   color: white;
 }
+
+@media screen and (max-width: 600px) {
+  #attribute-legend {
+    display: none;
+  }
+}
+
+@media screen and (max-wdith: 600px) {
+  #table-of-contents {
+    display: none;
+  }
+}
+
+.legendbutton {
+  background-color: rgba(128,128,128,0.9);
+  box-shadow: 0 1px 5px black;
+  border-radius: 5px;
+  color: white;
+  position: absolute;
+  z-index: 500;
+  right: 5%;
+  top: 20%;
+  font-family: 'Raleway', Helvetica, sans-serif;
+}

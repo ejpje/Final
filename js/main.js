@@ -105,6 +105,20 @@ function createMap(){
 };
 
 
+/*function toggleLegend(map){
+  showLegend = true;
+  alert("why");
+  var toggleLegend = function(){
+    if(showLegend === true){
+      $("#attribute-legend").hide();
+      showLegend = false;
+    } else {
+      $("#attribute-legend").show();
+      showLegend = true;
+    };
+  };
+};*/
+
 //function to attach popup to each feature
 function onEachFeature(feature, layer){
   var popupContent = "";
@@ -562,6 +576,7 @@ function getDanes (map, swedes, norwegians, danes){
   });
 };
 
+//function to get settlement data
 
 //function to update Swedish Viking symbols
 function updatePropSymbolsSwedes(swedeSize, map, attribute){
