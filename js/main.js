@@ -1,10 +1,10 @@
 /*Script by Emily Pettit, 2018*/
-/*
+
 //welcome screen
 $(document).click(function(){
   $("#welcomeWrapper").hide();
 });
-*/
+/*
 //create global variable for icons
 var settlementIcon = L.Icon.extend({
   options: {
@@ -17,7 +17,7 @@ var settlementIcon = L.Icon.extend({
 var daneIcon = new settlementIcon({iconUrl: "img/danesSet.svg"}), //icon courtesy of Julynn B. and The Noun Project
     swedeIcon = new settlementIcon({iconUrl: "img/swedesSet.svg"}), //icon courtesy of Julynn B. and The Noun Project
     norwegianIcon = new settlementIcon({iconUrl: "img/norwegiansSet.svg"}); //icon courtesy of Julynn B. and The Noun Project
-
+*/
 var countries = L.layerGroup(Countries);
 
 //function to color countries
@@ -82,6 +82,7 @@ function createMap(){
     "Danish": danes,
   };
 
+/*
   //Swedish settlements
   L.marker([57.4684, 18.4867], {icon: swedeIcon}).addTo(swedes).bindPopup("<p><b>Place:</b> Gotland, Sweden</p>" + "<p><b>Settlement Date: </b>700</p>");
   L.marker([59.326,	17.5667], {icon: swedeIcon}).addTo(swedes).bindPopup("<p><b>Place:</b> Birka, Sweden</p>" + "<p><b>Settlement Date: </b>780</p>");
@@ -98,26 +99,13 @@ function createMap(){
   //Danish settlements
   L.marker([48.8799, 0.1713], {icon: daneIcon}).addTo(danes).bindPopup("<p><b>Place:</b> Normandy, France</p>" + "<p><b>Settlement Date: </b>911</p>");
   L.marker([54.2194, 9.6961], {icon: daneIcon}).addTo(danes).bindPopup("<p><b>Place:</b> Danevirke, Germany</p>" + "<p><b>Settlement Date: </b>974</p>");
+*/
 
   //create layer control panel
   L.control.layers(baseMaps, overlayMaps, {collapsed:false}).addTo(map);
   return map;
 };
 
-
-/*function toggleLegend(map){
-  showLegend = true;
-  alert("why");
-  var toggleLegend = function(){
-    if(showLegend === true){
-      $("#attribute-legend").hide();
-      showLegend = false;
-    } else {
-      $("#attribute-legend").show();
-      showLegend = true;
-    };
-  };
-};*/
 
 //function to attach popup to each feature
 function onEachFeature(feature, layer){
@@ -139,7 +127,7 @@ function pointToLayer(feature, latlng, attributes){
   //create marker options
   if (feature.properties.SwedesRaidSettlement == 1){
     var options = {
-      fillColor: "#e8c900",
+      fillColor: "#c4aa03",
       color: "#000",
       weight: 1,
       opacity: 1,
@@ -256,7 +244,6 @@ function createPropSymbolsDanes(data, danes, attributes){
 };
 
 
-
 //function to create sequence controls
 function createSequenceControls(map, swedes, norwegians, danes, attributes){
   var SequenceControl = L.Control.extend({
@@ -353,8 +340,8 @@ function createLegendSwedes(map, attributes){
       var container = L.DomUtil.create("div", "legend-control-container");
       //create second container for the settlement icons
       var sub = L.DomUtil.create("div", "table-of-contents"),
-        grades = ["Swedish settlements ", "Norwegian settlements ", "Danish settlements "],
-        labels = ["img/swedesSet.svg", "img/norwegiansSet.svg", "img/danesSet.svg"];
+        grades = ["Swedish raids ", " Swedish settlements ", "Norwegian raids ", "Norwegian settlements ", "Danish raids ", "Danish settlements "],
+        labels = ["img/swedeRaid.png", "img/swedeImg.png", "img/norwegianRaid.png", "img/norwegianImg.png", "img/daneRaid.png", "img/daneImg.png"];
 
       //add temporal legend component
       $(container).append("<div id='temporal-legend'>");
@@ -384,7 +371,7 @@ function createLegendSwedes(map, attributes){
       //loop to add icons to the table of contents legend with labels
       for (var i = 0; i < grades.length; i++) {
         sub.innerHTML +=
-          grades[i] + ("<img src=" + labels[i] + " height='20' width='20'>") + "<br>";
+          grades[i] + ("<img src=" + labels[i] + " height='17' width='17'>") + "<br>";
       };
       $(container).append(sub);
 
@@ -576,7 +563,6 @@ function getDanes (map, swedes, norwegians, danes){
   });
 };
 
-//function to get settlement data
 
 //function to update Swedish Viking symbols
 function updatePropSymbolsSwedes(swedeSize, map, attribute){
@@ -647,7 +633,7 @@ function createPopUp(properties, attribute, layer, radius){
   var popupContent = " ";
 
   //specify the label by Viking group
-  if (properties.SwedeRaidSettlement == 1){
+  if (properties.SwedesRaidSettlement == 1){
     popupContent += "<p><b>Place:</b> " + properties.Location + "</p>" + "<p><b>Settlement Date: </b> " + properties.RaidDate + "</p>";
   } else
   if (properties.NorwegianRaidSettlement == 1){

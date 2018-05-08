@@ -143,13 +143,14 @@ h1 {
 
 .table-of-contents {
   background-color: rgba(128,128,128,0.9);
+  padding: 5px;
   box-shadow: 0 1px 5px black;
   border-radius: 5px;
   color: white;
   z-index: 120;
   font-family: 'Raleway', Helvetica, sans-serif;
   font-size: 1em;
-  text-align: center;
+  text-align: left;
 }
 
 .legend-control-container.leaflet-control {
@@ -190,4 +191,16 @@ h1 {
   right: 5%;
   top: 20%;
   font-family: 'Raleway', Helvetica, sans-serif;
+}
+
+.Sweden {
+  color: #fff600;
+}
+
+.Norway {
+  color: #0d00cc;
+}
+
+.Denmark {
+  color: #e20000;
 }
